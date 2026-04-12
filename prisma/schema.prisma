@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Client {
+  id                 String             @id @default(cuid())
+  // Identité
+  firstName          String
+  lastName           String
+  email              String?
+  phone              String
+  mobile             String?
+  // Entreprise
+  company            String?
+  jobTitle           String?
+  // Adresse
+  address            String?
+  city               String?
+  postalCode         String?
+  country            String?
+  // CRM
+  status             ClientStatus       @default(LEAD)
+  acquisitionChannel AcquisitionChannel
+  notes              String?
+  // Timestamps
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+enum ClientStatus {
+  LEAD
+  PROSPECT
+  CLIENT
+  CHURNED
+}
+
+enum AcquisitionChannel {
+  SMS
+  INSTAGRAM
+  PAPER_LETTER
+}
+
+model OAuthApp {
+  id           String       @id @default(cuid())
+  name         String
+  clientId     String       @unique @default(cuid())
+  clientSecret String
+  createdAt    DateTime     @default(now())
+  tokens       OAuthToken[]
+}
+
+model OAuthToken {
+  id          String   @id @default(cuid())
+  accessToken String   @unique
+  expiresAt   DateTime
+  appId       String
+  app         OAuthApp @relation(fields: [appId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
