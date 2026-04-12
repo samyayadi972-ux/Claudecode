@@ -1,14 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { AcquisitionChannel, ClientStatus } from "@prisma/client";
-
-const STATUS_CONFIG: Record<ClientStatus, { label: string; color: string; bg: string }> = {
-  LEAD:     { label: "Lead",      color: "#854d0e", bg: "#fef9c3" },
-  PROSPECT: { label: "Prospect",  color: "#1e40af", bg: "#dbeafe" },
-  CLIENT:   { label: "Client",    color: "#14532d", bg: "#dcfce7" },
-  CHURNED:  { label: "Churné",    color: "#7f1d1d", bg: "#fee2e2" },
-};
+import { AcquisitionChannel } from "@prisma/client";
 
 const CHANNEL_LABEL: Record<AcquisitionChannel, string> = {
   SMS:          "Campagne SMS",
@@ -29,7 +22,6 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
   const client = await prisma.client.findUnique({ where: { id: params.id } });
   if (!client) notFound();
 
-  const s = STATUS_CONFIG[client.status];
   const initials = (client.firstName[0] ?? "") + (client.lastName[0] ?? "");
   const hue = ((client.firstName.charCodeAt(0) ?? 0) * 37) % 360;
 
@@ -76,14 +68,6 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
             <h2 className="font-semibold text-gray-900 text-lg">{client.firstName} {client.lastName}</h2>
             {client.jobTitle && <p className="text-sm text-gray-400 mt-0.5">{client.jobTitle}</p>}
             {client.company && <p className="text-sm text-gray-500 mt-0.5 font-medium">{client.company}</p>}
-            <div className="mt-3">
-              <span
-                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
-                style={{ color: s.color, backgroundColor: s.bg }}
-              >
-                {s.label}
-              </span>
-            </div>
           </div>
 
           {/* Actions rapides */}
@@ -148,7 +132,6 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
           </div>
           <div className="px-5 py-2 pb-6">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide py-2">Acquisition</p>
-            <Field label="Statut CRM" value={STATUS_CONFIG[client.status].label} />
             <Field label="Canal" value={CHANNEL_LABEL[client.acquisitionChannel]} />
             <Field label="Ajouté le" value={new Date(client.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} />
             <Field label="Mis à jour" value={new Date(client.updatedAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} />
@@ -194,7 +177,6 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                 { label: "Ville",        value: client.city ?? "—" },
                 { label: "Pays",         value: client.country ?? "—" },
                 { label: "Canal",        value: CHANNEL_LABEL[client.acquisitionChannel] },
-                { label: "Statut",       value: STATUS_CONFIG[client.status].label },
               ].map((f) => (
                 <div key={f.label} className="bg-gray-50 rounded-lg px-3 py-2">
                   <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">{f.label}</p>

@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { AcquisitionChannel, ClientStatus } from "@prisma/client";
+import { AcquisitionChannel } from "@prisma/client";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -24,7 +24,6 @@ function extractClientData(formData: FormData) {
     city:               (formData.get("city") as string) || null,
     postalCode:         (formData.get("postalCode") as string) || null,
     country:            (formData.get("country") as string) || null,
-    status:             formData.get("status") as ClientStatus,
     acquisitionChannel: formData.get("acquisitionChannel") as AcquisitionChannel,
     notes:              (formData.get("notes") as string) || null,
   };

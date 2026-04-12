@@ -135,18 +135,6 @@ export default function ClientForm({ action, defaultValues: d = {}, backHref, ti
 
           <Section title="CRM">
             <SelectField
-              label="Statut"
-              name="status"
-              defaultValue={d.status ?? "LEAD"}
-              required
-              options={[
-                { value: "LEAD",     label: "Lead" },
-                { value: "PROSPECT", label: "Prospect" },
-                { value: "CLIENT",   label: "Client" },
-                { value: "CHURNED",  label: "Churné" },
-              ]}
-            />
-            <SelectField
               label="Canal d'acquisition"
               name="acquisitionChannel"
               defaultValue={d.acquisitionChannel ?? ""}

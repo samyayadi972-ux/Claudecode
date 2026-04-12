@@ -30,19 +30,11 @@ model Client {
   postalCode         String?
   country            String?
   // CRM
-  status             ClientStatus       @default(LEAD)
   acquisitionChannel AcquisitionChannel
   notes              String?
   // Timestamps
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
-}
-
-enum ClientStatus {
-  LEAD
-  PROSPECT
-  CLIENT
-  CHURNED
 }
 
 enum AcquisitionChannel {

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { validateBearerToken } from "@/lib/oauth";
-import { AcquisitionChannel, ClientStatus } from "@prisma/client";
+import { AcquisitionChannel } from "@prisma/client";
 
 const clientSchema = z.object({
   firstName:          z.string().min(1),
@@ -16,7 +16,6 @@ const clientSchema = z.object({
   city:               z.string().optional().nullable(),
   postalCode:         z.string().optional().nullable(),
   country:            z.string().optional().nullable(),
-  status:             z.nativeEnum(ClientStatus).optional(),
   acquisitionChannel: z.nativeEnum(AcquisitionChannel),
   notes:              z.string().optional().nullable(),
 });
@@ -28,12 +27,9 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const search  = searchParams.get("search") ?? "";
   const channel = searchParams.get("channel") as AcquisitionChannel | null;
-  const status  = searchParams.get("status") as ClientStatus | null;
-
   const clients = await prisma.client.findMany({
     where: {
       ...(channel ? { acquisitionChannel: channel } : {}),
-      ...(status  ? { status } : {}),
       ...(search  ? {
         OR: [
           { firstName: { contains: search, mode: "insensitive" } },
