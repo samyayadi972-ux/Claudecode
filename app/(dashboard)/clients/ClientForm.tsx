@@ -165,9 +165,11 @@ export default function ClientForm({ action, defaultValues: d = {}, backHref, ti
               required
               options={[
                 { value: "SMS",            label: "Campagne SMS" },
-                { value: "INSTAGRAM",    label: "Campagne Instagram" },
-                { value: "PAPER_LETTER", label: "Courrier papier" },
+                { value: "INSTAGRAM",      label: "Campagne Instagram" },
+                { value: "PAPER_LETTER",   label: "Courrier papier" },
                 { value: "RECOMMENDATION", label: "Recommandation" },
+                { value: "PARRAINAGE",     label: "Parrainage" },
+                { value: "FORMATION",      label: "Formation" },
               ]}
             />
           </Section>

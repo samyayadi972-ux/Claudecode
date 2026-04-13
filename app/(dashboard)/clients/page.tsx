@@ -20,9 +20,11 @@ const CHANNEL_CONFIG: Record<AcquisitionChannel, { label: string; color: string;
   INSTAGRAM:      { label: "Instagram",       color: "#9d174d", bg: "#fce7f3", bar: "#db2777" },
   PAPER_LETTER:   { label: "Courrier papier", color: "#1e3a5f", bg: "#dbeafe", bar: "#3b82f6" },
   RECOMMENDATION: { label: "Recommandation",  color: "#065f46", bg: "#d1fae5", bar: "#10b981" },
+  PARRAINAGE:     { label: "Parrainage",       color: "#92400e", bg: "#fef3c7", bar: "#f59e0b" },
+  FORMATION:      { label: "Formation",        color: "#3730a3", bg: "#e0e7ff", bar: "#6366f1" },
 };
 
-const CHANNEL_ORDER: AcquisitionChannel[] = ["SMS", "INSTAGRAM", "PAPER_LETTER", "RECOMMENDATION"];
+const CHANNEL_ORDER: AcquisitionChannel[] = ["SMS", "INSTAGRAM", "PAPER_LETTER", "RECOMMENDATION", "PARRAINAGE", "FORMATION"];
 
 export default async function ClientsPage({
   searchParams,
@@ -82,22 +84,32 @@ export default async function ClientsPage({
       </div>
 
       {/* Stats par canal */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 grid grid-cols-4 gap-3">
-        {CHANNEL_ORDER.map((ch) => {
-          const cfg   = CHANNEL_CONFIG[ch];
-          const count = channelCounts[ch] ?? 0;
-          const pct   = total > 0 ? Math.round((count / total) * 100) : 0;
-          return (
-            <div key={ch} className="rounded-xl border border-gray-100 p-4 bg-white hover:shadow-sm transition-shadow">
-              <p className="text-xs font-semibold uppercase tracking-wide truncate" style={{ color: cfg.color }}>{cfg.label}</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1 leading-none">{count}</p>
-              <div className="mt-3 h-1.5 rounded-full bg-gray-100">
-                <div className="h-1.5 rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: cfg.bar }} />
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex gap-3">
+        {/* Carte Total */}
+        <div className="rounded-xl p-5 flex flex-col justify-between shrink-0 w-44" style={{ backgroundColor: "#1b2638" }}>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Total clients</p>
+          <p className="text-5xl font-bold text-white mt-2 leading-none">{total}</p>
+          <p className="text-xs text-gray-500 mt-3">tous canaux confondus</p>
+        </div>
+
+        {/* Cartes par canal */}
+        <div className="grid grid-cols-3 gap-3 flex-1">
+          {CHANNEL_ORDER.map((ch) => {
+            const cfg   = CHANNEL_CONFIG[ch];
+            const count = channelCounts[ch] ?? 0;
+            const pct   = total > 0 ? Math.round((count / total) * 100) : 0;
+            return (
+              <div key={ch} className="rounded-xl border border-gray-100 p-3 bg-white hover:shadow-sm transition-shadow">
+                <p className="text-xs font-semibold uppercase tracking-wide truncate" style={{ color: cfg.color }}>{cfg.label}</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1 leading-none">{count}</p>
+                <div className="mt-2 h-1.5 rounded-full bg-gray-100">
+                  <div className="h-1.5 rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: cfg.bar }} />
+                </div>
+                <p className="text-sm font-semibold mt-1.5" style={{ color: cfg.bar }}>{pct}%</p>
               </div>
-              <p className="text-xs text-gray-400 mt-1.5">{pct}% du total</p>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Filtres */}
@@ -132,6 +144,8 @@ export default async function ClientsPage({
             <option value="INSTAGRAM">Instagram</option>
             <option value="PAPER_LETTER">Courrier papier</option>
             <option value="RECOMMENDATION">Recommandation</option>
+            <option value="PARRAINAGE">Parrainage</option>
+            <option value="FORMATION">Formation</option>
           </select>
           <button type="submit" className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg font-medium text-gray-700">
             Filtrer

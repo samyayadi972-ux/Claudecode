@@ -32,6 +32,20 @@ async function main() {
     `);
   }
 
+  // Migration 3 — add_parrainage_formation_channels
+  await client.query(`ALTER TYPE "AcquisitionChannel" ADD VALUE IF NOT EXISTS 'PARRAINAGE';`);
+  await client.query(`ALTER TYPE "AcquisitionChannel" ADD VALUE IF NOT EXISTS 'FORMATION';`);
+
+  const exists3 = await client.query(
+    `SELECT 1 FROM "_prisma_migrations" WHERE migration_name = '20260413_add_parrainage_formation_channels'`
+  );
+  if (exists3.rowCount === 0) {
+    await client.query(`
+      INSERT INTO "_prisma_migrations" (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count)
+      VALUES (gen_random_uuid()::text, 'manual', now(), '20260413_add_parrainage_formation_channels', NULL, NULL, now(), 1)
+    `);
+  }
+
   await client.end();
   console.log("Migrations Neon appliquées.");
 }

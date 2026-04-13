@@ -58,6 +58,8 @@ enum AcquisitionChannel {
   INSTAGRAM
   PAPER_LETTER
   RECOMMENDATION
+  PARRAINAGE
+  FORMATION
 }
 
 model OAuthApp {

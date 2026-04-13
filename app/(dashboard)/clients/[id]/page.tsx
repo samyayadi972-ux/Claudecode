@@ -8,6 +8,8 @@ const CHANNEL_LABEL: Record<AcquisitionChannel, string> = {
   INSTAGRAM:      "Campagne Instagram",
   PAPER_LETTER:   "Courrier papier",
   RECOMMENDATION: "Recommandation",
+  PARRAINAGE:     "Parrainage",
+  FORMATION:      "Formation",
 };
 
 const CLIENT_STATUS: Record<ClientStatus, { label: string; color: string; bg: string }> = {
