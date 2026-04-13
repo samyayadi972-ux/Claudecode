@@ -24,6 +24,8 @@ model Client {
   // Entreprise
   company            String?
   amazonStoreName    String?
+  sireneNumber       String?
+  vatNumber          String?
   // Adresse
   address            String?
   city               String?

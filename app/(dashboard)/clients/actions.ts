@@ -20,6 +20,8 @@ function extractClientData(formData: FormData) {
     mobile:             (formData.get("mobile") as string) || null,
     company:            (formData.get("company") as string) || null,
     amazonStoreName:    (formData.get("amazonStoreName") as string) || null,
+    sireneNumber:       (formData.get("sireneNumber") as string) || null,
+    vatNumber:          (formData.get("vatNumber") as string) || null,
     address:            (formData.get("address") as string) || null,
     city:               (formData.get("city") as string) || null,
     postalCode:         (formData.get("postalCode") as string) || null,

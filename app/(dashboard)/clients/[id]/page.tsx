@@ -143,8 +143,10 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
           </div>
           <div className="px-5 py-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide py-2">Entreprise</p>
-            <Field label="Société" value={client.company} />
+            <Field label="Société"        value={client.company} />
             <Field label="Boutique Amazon" value={client.amazonStoreName} />
+            <Field label="SIRENE"          value={client.sireneNumber} />
+            <Field label="N° TVA"          value={client.vatNumber} />
           </div>
           <div className="px-5 py-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide py-2">Adresse</p>
@@ -199,6 +201,8 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                 { label: "Mobile",       value: client.mobile ?? "—" },
                 { label: "Société",         value: client.company ?? "—" },
                 { label: "Boutique Amazon", value: client.amazonStoreName ?? "—" },
+                { label: "SIRENE",          value: client.sireneNumber ?? "—" },
+                { label: "N° TVA",          value: client.vatNumber ?? "—" },
                 { label: "Ville",           value: client.city ?? "—" },
                 { label: "Pays",            value: client.country ?? "—" },
                 { label: "Statut client",   value: CLIENT_STATUS[client.clientStatus].label },
