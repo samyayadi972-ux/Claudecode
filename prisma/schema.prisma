@@ -23,18 +23,32 @@ model Client {
   mobile             String?
   // Entreprise
   company            String?
-  jobTitle           String?
+  amazonStoreName    String?
   // Adresse
   address            String?
   city               String?
   postalCode         String?
   country            String?
   // CRM
+  clientStatus       ClientStatus
+  shippingStatus     ShippingStatus
   acquisitionChannel AcquisitionChannel
   notes              String?
   // Timestamps
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
+}
+
+enum ClientStatus {
+  PROSPECT
+  EN_COURS
+  CLIENT
+}
+
+enum ShippingStatus {
+  NOT_SHIPPED
+  FIRST_SHIPPING
+  SHIPPED
 }
 
 enum AcquisitionChannel {

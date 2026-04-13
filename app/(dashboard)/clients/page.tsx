@@ -1,7 +1,19 @@
 import { prisma } from "@/lib/db";
-import { AcquisitionChannel } from "@prisma/client";
+import { AcquisitionChannel, ClientStatus, ShippingStatus } from "@prisma/client";
 import Link from "next/link";
 import DeleteClientButton from "./DeleteClientButton";
+
+const CLIENT_STATUS: Record<ClientStatus, { label: string; color: string; bg: string }> = {
+  PROSPECT: { label: "Prospect",             color: "#1e40af", bg: "#dbeafe" },
+  EN_COURS: { label: "En cours d'acq.",      color: "#92400e", bg: "#fef3c7" },
+  CLIENT:   { label: "Client",               color: "#14532d", bg: "#dcfce7" },
+};
+
+const SHIPPING_STATUS: Record<ShippingStatus, { label: string; color: string; bg: string; dot: string }> = {
+  NOT_SHIPPED:    { label: "Pas encore expédié",       color: "#991b1b", bg: "#fee2e2", dot: "#ef4444" },
+  FIRST_SHIPPING: { label: "1ère expédition en cours", color: "#92400e", bg: "#fff7ed", dot: "#f97316" },
+  SHIPPED:        { label: "Expédition réussie",       color: "#14532d", bg: "#dcfce7", dot: "#22c55e" },
+};
 
 const CHANNEL_CONFIG: Record<AcquisitionChannel, { label: string; color: string; bg: string }> = {
   SMS:          { label: "SMS",       color: "#5b21b6", bg: "#ede9fe" },
@@ -12,22 +24,25 @@ const CHANNEL_CONFIG: Record<AcquisitionChannel, { label: string; color: string;
 export default async function ClientsPage({
   searchParams,
 }: {
-  searchParams: { search?: string; channel?: string };
+  searchParams: { search?: string; channel?: string; clientStatus?: string; shippingStatus?: string };
 }) {
-  const { search = "", channel } = searchParams;
+  const { search = "", channel, clientStatus, shippingStatus } = searchParams;
 
   const [clients, total] = await Promise.all([
     prisma.client.findMany({
       where: {
-        ...(channel ? { acquisitionChannel: channel as AcquisitionChannel } : {}),
+        ...(channel        ? { acquisitionChannel: channel as AcquisitionChannel } : {}),
+        ...(clientStatus   ? { clientStatus: clientStatus as ClientStatus }         : {}),
+        ...(shippingStatus ? { shippingStatus: shippingStatus as ShippingStatus }   : {}),
         ...(search ? {
           OR: [
-            { firstName: { contains: search, mode: "insensitive" } },
-            { lastName:  { contains: search, mode: "insensitive" } },
-            { email:     { contains: search, mode: "insensitive" } },
-            { phone:     { contains: search } },
-            { company:   { contains: search, mode: "insensitive" } },
-            { city:      { contains: search, mode: "insensitive" } },
+            { firstName:      { contains: search, mode: "insensitive" } },
+            { lastName:       { contains: search, mode: "insensitive" } },
+            { email:          { contains: search, mode: "insensitive" } },
+            { phone:          { contains: search } },
+            { company:        { contains: search, mode: "insensitive" } },
+            { amazonStoreName:{ contains: search, mode: "insensitive" } },
+            { city:           { contains: search, mode: "insensitive" } },
           ],
         } : {}),
       },
@@ -56,30 +71,34 @@ export default async function ClientsPage({
             Nouveau contact
           </Link>
         </div>
-
-        {/* KPI */}
-        <div className="flex gap-4 mt-4">
-          <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-4 py-2 border border-gray-100">
-            <span className="text-2xl font-bold" style={{ color: "#6366f1" }}>{total}</span>
-            <span className="text-xs text-gray-400 font-medium">Clients</span>
-          </div>
-        </div>
       </div>
 
       {/* Filtres */}
-      <div className="bg-white border-b border-gray-200 px-6 py-3 flex gap-3 items-center">
-        <form method="GET" className="flex gap-3 flex-1">
-          <div className="relative flex-1 max-w-xs">
+      <div className="bg-white border-b border-gray-200 px-6 py-3 flex gap-3 items-center flex-wrap">
+        <form method="GET" className="flex gap-3 flex-1 flex-wrap">
+          <div className="relative flex-1 min-w-[180px] max-w-xs">
             <svg className="absolute left-3 top-2.5 text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
               name="search"
               defaultValue={search}
-              placeholder="Rechercher un contact..."
+              placeholder="Rechercher..."
               className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+          <select name="clientStatus" defaultValue={clientStatus ?? ""} className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <option value="">Tous les statuts</option>
+            <option value="PROSPECT">Prospect</option>
+            <option value="EN_COURS">En cours d&apos;acquisition</option>
+            <option value="CLIENT">Client</option>
+          </select>
+          <select name="shippingStatus" defaultValue={shippingStatus ?? ""} className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <option value="">Toutes les expéditions</option>
+            <option value="NOT_SHIPPED">Pas encore expédié</option>
+            <option value="FIRST_SHIPPING">1ère expédition en cours</option>
+            <option value="SHIPPED">Expédition réussie</option>
+          </select>
           <select name="channel" defaultValue={channel ?? ""} className="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
             <option value="">Tous les canaux</option>
             <option value="SMS">SMS</option>
@@ -89,13 +108,13 @@ export default async function ClientsPage({
           <button type="submit" className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg font-medium text-gray-700">
             Filtrer
           </button>
-          {(search || channel) && (
+          {(search || channel || clientStatus || shippingStatus) && (
             <Link href="/clients" className="px-3 py-2 text-sm text-gray-400 hover:text-gray-600">
               Effacer
             </Link>
           )}
         </form>
-        <span className="text-sm text-gray-400">{clients.length} résultat{clients.length !== 1 ? "s" : ""}</span>
+        <span className="text-sm text-gray-400 shrink-0">{clients.length} résultat{clients.length !== 1 ? "s" : ""}</span>
       </div>
 
       {/* Table */}
@@ -103,8 +122,7 @@ export default async function ClientsPage({
         {clients.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-gray-300">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
             </svg>
             <p className="mt-3 text-sm">Aucun contact trouvé</p>
             <Link href="/clients/new" className="mt-3 text-sm text-blue-500 hover:underline">+ Créer le premier contact</Link>
@@ -113,7 +131,7 @@ export default async function ClientsPage({
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-200 sticky top-0">
-                {["Contact", "Entreprise", "Email", "Téléphone", "Ville", "Canal", "Ajouté le", ""].map((h) => (
+                {["Contact", "Boutique Amazon", "Email", "Téléphone", "Ville", "Statut client", "Expédition", "Canal", "Ajouté le", ""].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">
                     {h}
                   </th>
@@ -122,11 +140,14 @@ export default async function ClientsPage({
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
               {clients.map((c) => {
-                const ch = CHANNEL_CONFIG[c.acquisitionChannel];
+                const cs  = CLIENT_STATUS[c.clientStatus];
+                const ss  = SHIPPING_STATUS[c.shippingStatus];
+                const ch  = CHANNEL_CONFIG[c.acquisitionChannel];
                 const initials = (c.firstName[0] ?? "") + (c.lastName[0] ?? "");
                 const hue = ((c.firstName.charCodeAt(0) ?? 0) * 37) % 360;
                 return (
                   <tr key={c.id} className="hover:bg-blue-50/40 transition-colors group">
+                    {/* Contact */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ backgroundColor: `hsl(${hue},55%,50%)` }}>
@@ -136,26 +157,46 @@ export default async function ClientsPage({
                           <Link href={`/clients/${c.id}`} className="font-semibold text-gray-900 hover:text-blue-600 whitespace-nowrap">
                             {c.firstName} {c.lastName}
                           </Link>
-                          {c.jobTitle && <p className="text-xs text-gray-400">{c.jobTitle}</p>}
+                          {c.company && <p className="text-xs text-gray-400">{c.company}</p>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{c.company ?? <span className="text-gray-200">—</span>}</td>
+                    {/* Boutique Amazon */}
+                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{c.amazonStoreName ?? <span className="text-gray-200">—</span>}</td>
+                    {/* Email */}
                     <td className="px-4 py-3">
                       {c.email ? <a href={`mailto:${c.email}`} className="text-blue-600 hover:underline whitespace-nowrap">{c.email}</a> : <span className="text-gray-200">—</span>}
                     </td>
+                    {/* Téléphone */}
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                      {c.phone && <a href={`tel:${c.phone}`} className="hover:text-blue-600">{c.phone}</a>}
+                      <a href={`tel:${c.phone}`} className="hover:text-blue-600">{c.phone}</a>
                     </td>
+                    {/* Ville */}
                     <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{c.city ?? <span className="text-gray-200">—</span>}</td>
+                    {/* Statut client */}
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap" style={{ color: cs.color, backgroundColor: cs.bg }}>
+                        {cs.label}
+                      </span>
+                    </td>
+                    {/* Expédition */}
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap" style={{ color: ss.color, backgroundColor: ss.bg }}>
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: ss.dot }} />
+                        {ss.label}
+                      </span>
+                    </td>
+                    {/* Canal */}
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap" style={{ color: ch.color, backgroundColor: ch.bg }}>
                         {ch.label}
                       </span>
                     </td>
+                    {/* Date */}
                     <td className="px-4 py-3 text-gray-400 whitespace-nowrap text-xs">
                       {new Date(c.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}
                     </td>
+                    {/* Actions */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Link href={`/clients/${c.id}`} className="p-1.5 rounded hover:bg-blue-100 text-gray-400 hover:text-blue-600" title="Voir">

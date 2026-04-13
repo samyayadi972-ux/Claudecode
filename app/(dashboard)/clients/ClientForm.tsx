@@ -122,8 +122,8 @@ export default function ClientForm({ action, defaultValues: d = {}, backHref, ti
           </Section>
 
           <Section title="Entreprise">
-            <Field label="Société" name="company"  defaultValue={d.company}  placeholder="FBG Corp" />
-            <Field label="Poste"   name="jobTitle" defaultValue={d.jobTitle} placeholder="Directeur commercial" />
+            <Field label="Société"               name="company"         defaultValue={d.company}         placeholder="FBG Corp" />
+            <Field label="Nom de boutique Amazon" name="amazonStoreName" defaultValue={d.amazonStoreName} placeholder="Ma Boutique FR" />
           </Section>
 
           <Section title="Adresse">
@@ -134,6 +134,28 @@ export default function ClientForm({ action, defaultValues: d = {}, backHref, ti
           </Section>
 
           <Section title="CRM">
+            <SelectField
+              label="Statut client"
+              name="clientStatus"
+              defaultValue={d.clientStatus ?? ""}
+              required
+              options={[
+                { value: "PROSPECT", label: "Prospect" },
+                { value: "EN_COURS", label: "En cours d'acquisition" },
+                { value: "CLIENT",   label: "Client" },
+              ]}
+            />
+            <SelectField
+              label="Statut expédition"
+              name="shippingStatus"
+              defaultValue={d.shippingStatus ?? ""}
+              required
+              options={[
+                { value: "NOT_SHIPPED",    label: "Pas encore expédié" },
+                { value: "FIRST_SHIPPING", label: "Première expédition en cours" },
+                { value: "SHIPPED",        label: "Expédition réussie" },
+              ]}
+            />
             <SelectField
               label="Canal d'acquisition"
               name="acquisitionChannel"

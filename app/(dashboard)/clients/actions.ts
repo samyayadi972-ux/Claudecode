@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { AcquisitionChannel } from "@prisma/client";
+import { AcquisitionChannel, ClientStatus, ShippingStatus } from "@prisma/client";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -19,11 +19,13 @@ function extractClientData(formData: FormData) {
     phone:              formData.get("phone") as string,
     mobile:             (formData.get("mobile") as string) || null,
     company:            (formData.get("company") as string) || null,
-    jobTitle:           (formData.get("jobTitle") as string) || null,
+    amazonStoreName:    (formData.get("amazonStoreName") as string) || null,
     address:            (formData.get("address") as string) || null,
     city:               (formData.get("city") as string) || null,
     postalCode:         (formData.get("postalCode") as string) || null,
     country:            (formData.get("country") as string) || null,
+    clientStatus:       formData.get("clientStatus") as ClientStatus,
+    shippingStatus:     formData.get("shippingStatus") as ShippingStatus,
     acquisitionChannel: formData.get("acquisitionChannel") as AcquisitionChannel,
     notes:              (formData.get("notes") as string) || null,
   };

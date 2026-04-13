@@ -1,12 +1,24 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { AcquisitionChannel } from "@prisma/client";
+import { AcquisitionChannel, ClientStatus, ShippingStatus } from "@prisma/client";
 
 const CHANNEL_LABEL: Record<AcquisitionChannel, string> = {
   SMS:          "Campagne SMS",
   INSTAGRAM:    "Campagne Instagram",
   PAPER_LETTER: "Courrier papier",
+};
+
+const CLIENT_STATUS: Record<ClientStatus, { label: string; color: string; bg: string }> = {
+  PROSPECT: { label: "Prospect",             color: "#1e40af", bg: "#dbeafe" },
+  EN_COURS: { label: "En cours d'acq.",      color: "#92400e", bg: "#fef3c7" },
+  CLIENT:   { label: "Client",               color: "#14532d", bg: "#dcfce7" },
+};
+
+const SHIPPING_STATUS: Record<ShippingStatus, { label: string; color: string; bg: string; dot: string }> = {
+  NOT_SHIPPED:    { label: "Pas encore expédié",       color: "#991b1b", bg: "#fee2e2", dot: "#ef4444" },
+  FIRST_SHIPPING: { label: "1ère expédition en cours", color: "#92400e", bg: "#fff7ed", dot: "#f97316" },
+  SHIPPED:        { label: "Expédition réussie",       color: "#14532d", bg: "#dcfce7", dot: "#22c55e" },
 };
 
 function Field({ label, value }: { label: string; value?: string | null }) {
@@ -22,6 +34,8 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
   const client = await prisma.client.findUnique({ where: { id: params.id } });
   if (!client) notFound();
 
+  const cs  = CLIENT_STATUS[client.clientStatus];
+  const ss  = SHIPPING_STATUS[client.shippingStatus];
   const initials = (client.firstName[0] ?? "") + (client.lastName[0] ?? "");
   const hue = ((client.firstName.charCodeAt(0) ?? 0) * 37) % 360;
 
@@ -66,8 +80,17 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
               {initials.toUpperCase()}
             </div>
             <h2 className="font-semibold text-gray-900 text-lg">{client.firstName} {client.lastName}</h2>
-            {client.jobTitle && <p className="text-sm text-gray-400 mt-0.5">{client.jobTitle}</p>}
             {client.company && <p className="text-sm text-gray-500 mt-0.5 font-medium">{client.company}</p>}
+            {client.amazonStoreName && <p className="text-xs text-gray-400 mt-0.5">🛒 {client.amazonStoreName}</p>}
+            <div className="mt-3 flex flex-col items-center gap-2">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold" style={{ color: cs.color, backgroundColor: cs.bg }}>
+                {cs.label}
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold" style={{ color: ss.color, backgroundColor: ss.bg }}>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ss.dot }} />
+                {ss.label}
+              </span>
+            </div>
           </div>
 
           {/* Actions rapides */}
@@ -121,7 +144,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
           <div className="px-5 py-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide py-2">Entreprise</p>
             <Field label="Société" value={client.company} />
-            <Field label="Poste" value={client.jobTitle} />
+            <Field label="Boutique Amazon" value={client.amazonStoreName} />
           </div>
           <div className="px-5 py-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide py-2">Adresse</p>
@@ -132,7 +155,9 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
           </div>
           <div className="px-5 py-2 pb-6">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide py-2">Acquisition</p>
-            <Field label="Canal" value={CHANNEL_LABEL[client.acquisitionChannel]} />
+            <Field label="Statut client"    value={CLIENT_STATUS[client.clientStatus].label} />
+            <Field label="Expédition"       value={SHIPPING_STATUS[client.shippingStatus].label} />
+            <Field label="Canal"            value={CHANNEL_LABEL[client.acquisitionChannel]} />
             <Field label="Ajouté le" value={new Date(client.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} />
             <Field label="Mis à jour" value={new Date(client.updatedAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })} />
           </div>
@@ -172,11 +197,13 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                 { label: "Email",        value: client.email ?? "—" },
                 { label: "Téléphone",    value: client.phone },
                 { label: "Mobile",       value: client.mobile ?? "—" },
-                { label: "Société",      value: client.company ?? "—" },
-                { label: "Poste",        value: client.jobTitle ?? "—" },
-                { label: "Ville",        value: client.city ?? "—" },
-                { label: "Pays",         value: client.country ?? "—" },
-                { label: "Canal",        value: CHANNEL_LABEL[client.acquisitionChannel] },
+                { label: "Société",         value: client.company ?? "—" },
+                { label: "Boutique Amazon", value: client.amazonStoreName ?? "—" },
+                { label: "Ville",           value: client.city ?? "—" },
+                { label: "Pays",            value: client.country ?? "—" },
+                { label: "Statut client",   value: CLIENT_STATUS[client.clientStatus].label },
+                { label: "Expédition",      value: SHIPPING_STATUS[client.shippingStatus].label },
+                { label: "Canal",           value: CHANNEL_LABEL[client.acquisitionChannel] },
               ].map((f) => (
                 <div key={f.label} className="bg-gray-50 rounded-lg px-3 py-2">
                   <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">{f.label}</p>
