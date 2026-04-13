@@ -15,11 +15,14 @@ const SHIPPING_STATUS: Record<ShippingStatus, { label: string; color: string; bg
   SHIPPED:        { label: "Expédition réussie",       color: "#14532d", bg: "#dcfce7", dot: "#22c55e" },
 };
 
-const CHANNEL_CONFIG: Record<AcquisitionChannel, { label: string; color: string; bg: string }> = {
-  SMS:          { label: "SMS",       color: "#5b21b6", bg: "#ede9fe" },
-  INSTAGRAM:    { label: "Instagram", color: "#9d174d", bg: "#fce7f3" },
-  PAPER_LETTER: { label: "Courrier",  color: "#1e3a5f", bg: "#dbeafe" },
+const CHANNEL_CONFIG: Record<AcquisitionChannel, { label: string; color: string; bg: string; bar: string }> = {
+  SMS:            { label: "SMS",             color: "#5b21b6", bg: "#ede9fe", bar: "#7c3aed" },
+  INSTAGRAM:      { label: "Instagram",       color: "#9d174d", bg: "#fce7f3", bar: "#db2777" },
+  PAPER_LETTER:   { label: "Courrier papier", color: "#1e3a5f", bg: "#dbeafe", bar: "#3b82f6" },
+  RECOMMENDATION: { label: "Recommandation",  color: "#065f46", bg: "#d1fae5", bar: "#10b981" },
 };
+
+const CHANNEL_ORDER: AcquisitionChannel[] = ["SMS", "INSTAGRAM", "PAPER_LETTER", "RECOMMENDATION"];
 
 export default async function ClientsPage({
   searchParams,
@@ -28,7 +31,7 @@ export default async function ClientsPage({
 }) {
   const { search = "", channel, clientStatus, shippingStatus } = searchParams;
 
-  const [clients, total] = await Promise.all([
+  const [clients, total, channelStats] = await Promise.all([
     prisma.client.findMany({
       where: {
         ...(channel        ? { acquisitionChannel: channel as AcquisitionChannel } : {}),
@@ -49,7 +52,12 @@ export default async function ClientsPage({
       orderBy: { createdAt: "desc" },
     }),
     prisma.client.count(),
+    prisma.client.groupBy({ by: ["acquisitionChannel"], _count: { _all: true } }),
   ]);
+
+  const channelCounts = Object.fromEntries(
+    channelStats.map((s) => [s.acquisitionChannel, s._count._all])
+  ) as Partial<Record<AcquisitionChannel, number>>;
 
   return (
     <div className="flex flex-col h-full">
@@ -71,6 +79,25 @@ export default async function ClientsPage({
             Nouveau contact
           </Link>
         </div>
+      </div>
+
+      {/* Stats par canal */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4 grid grid-cols-4 gap-3">
+        {CHANNEL_ORDER.map((ch) => {
+          const cfg   = CHANNEL_CONFIG[ch];
+          const count = channelCounts[ch] ?? 0;
+          const pct   = total > 0 ? Math.round((count / total) * 100) : 0;
+          return (
+            <div key={ch} className="rounded-xl border border-gray-100 p-4 bg-white hover:shadow-sm transition-shadow">
+              <p className="text-xs font-semibold uppercase tracking-wide truncate" style={{ color: cfg.color }}>{cfg.label}</p>
+              <p className="text-3xl font-bold text-gray-900 mt-1 leading-none">{count}</p>
+              <div className="mt-3 h-1.5 rounded-full bg-gray-100">
+                <div className="h-1.5 rounded-full transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: cfg.bar }} />
+              </div>
+              <p className="text-xs text-gray-400 mt-1.5">{pct}% du total</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Filtres */}
@@ -103,7 +130,8 @@ export default async function ClientsPage({
             <option value="">Tous les canaux</option>
             <option value="SMS">SMS</option>
             <option value="INSTAGRAM">Instagram</option>
-            <option value="PAPER_LETTER">Courrier</option>
+            <option value="PAPER_LETTER">Courrier papier</option>
+            <option value="RECOMMENDATION">Recommandation</option>
           </select>
           <button type="submit" className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg font-medium text-gray-700">
             Filtrer

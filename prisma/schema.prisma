@@ -57,6 +57,7 @@ enum AcquisitionChannel {
   SMS
   INSTAGRAM
   PAPER_LETTER
+  RECOMMENDATION
 }
 
 model OAuthApp {

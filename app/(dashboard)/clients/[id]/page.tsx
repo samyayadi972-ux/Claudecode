@@ -4,9 +4,10 @@ import Link from "next/link";
 import { AcquisitionChannel, ClientStatus, ShippingStatus } from "@prisma/client";
 
 const CHANNEL_LABEL: Record<AcquisitionChannel, string> = {
-  SMS:          "Campagne SMS",
-  INSTAGRAM:    "Campagne Instagram",
-  PAPER_LETTER: "Courrier papier",
+  SMS:            "Campagne SMS",
+  INSTAGRAM:      "Campagne Instagram",
+  PAPER_LETTER:   "Courrier papier",
+  RECOMMENDATION: "Recommandation",
 };
 
 const CLIENT_STATUS: Record<ClientStatus, { label: string; color: string; bg: string }> = {
@@ -145,7 +146,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide py-2">Entreprise</p>
             <Field label="Société"        value={client.company} />
             <Field label="Boutique Amazon" value={client.amazonStoreName} />
-            <Field label="SIRENE"          value={client.sireneNumber} />
+            <Field label="SIREN"          value={client.sireneNumber} />
             <Field label="N° TVA"          value={client.vatNumber} />
           </div>
           <div className="px-5 py-2">
@@ -201,7 +202,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                 { label: "Mobile",       value: client.mobile ?? "—" },
                 { label: "Société",         value: client.company ?? "—" },
                 { label: "Boutique Amazon", value: client.amazonStoreName ?? "—" },
-                { label: "SIRENE",          value: client.sireneNumber ?? "—" },
+                { label: "SIREN",          value: client.sireneNumber ?? "—" },
                 { label: "N° TVA",          value: client.vatNumber ?? "—" },
                 { label: "Ville",           value: client.city ?? "—" },
                 { label: "Pays",            value: client.country ?? "—" },

@@ -124,7 +124,7 @@ export default function ClientForm({ action, defaultValues: d = {}, backHref, ti
           <Section title="Entreprise">
             <Field label="Société"                name="company"         defaultValue={d.company}         placeholder="FBG Corp" />
             <Field label="Nom de boutique Amazon" name="amazonStoreName" defaultValue={d.amazonStoreName} placeholder="Ma Boutique FR" />
-            <Field label="Numéro SIRENE"          name="sireneNumber"    defaultValue={d.sireneNumber}    placeholder="123 456 789" />
+            <Field label="Numéro SIREN"           name="sireneNumber"    defaultValue={d.sireneNumber}    placeholder="123 456 789" />
             <Field label="Numéro de TVA"          name="vatNumber"       defaultValue={d.vatNumber}       placeholder="FR 12 345678901" />
           </Section>
 
@@ -164,9 +164,10 @@ export default function ClientForm({ action, defaultValues: d = {}, backHref, ti
               defaultValue={d.acquisitionChannel ?? ""}
               required
               options={[
-                { value: "SMS",          label: "Campagne SMS" },
+                { value: "SMS",            label: "Campagne SMS" },
                 { value: "INSTAGRAM",    label: "Campagne Instagram" },
                 { value: "PAPER_LETTER", label: "Courrier papier" },
+                { value: "RECOMMENDATION", label: "Recommandation" },
               ]}
             />
           </Section>
