@@ -26,7 +26,7 @@ const CHANNEL_CONFIG: Record<AcquisitionChannel, { label: string; color: string;
 
 const CHANNEL_ORDER: AcquisitionChannel[] = ["SMS", "INSTAGRAM", "PAPER_LETTER", "RECOMMENDATION", "PARRAINAGE", "FORMATION"];
 
-const MILESTONES = [
+const MILESTONES: { value: number; emoji: string; label: string }[] = [
   { value: 25,  emoji: "🌱", label: "25" },
   { value: 50,  emoji: "⚡", label: "50" },
   { value: 75,  emoji: "🔥", label: "75" },
