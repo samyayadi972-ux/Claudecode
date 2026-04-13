@@ -1,0 +1,2 @@
+ALTER TYPE "AcquisitionChannel" ADD VALUE 'PARRAINAGE';
+ALTER TYPE "AcquisitionChannel" ADD VALUE 'FORMATION';

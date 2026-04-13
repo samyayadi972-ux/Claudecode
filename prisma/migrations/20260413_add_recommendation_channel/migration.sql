@@ -1,0 +1,1 @@
+ALTER TYPE "AcquisitionChannel" ADD VALUE 'RECOMMENDATION';
