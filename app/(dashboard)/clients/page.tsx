@@ -26,6 +26,14 @@ const CHANNEL_CONFIG: Record<AcquisitionChannel, { label: string; color: string;
 
 const CHANNEL_ORDER: AcquisitionChannel[] = ["SMS", "INSTAGRAM", "PAPER_LETTER", "RECOMMENDATION", "PARRAINAGE", "FORMATION"];
 
+const MILESTONES = [
+  { value: 25,  emoji: "🌱", label: "25" },
+  { value: 50,  emoji: "⚡", label: "50" },
+  { value: 75,  emoji: "🔥", label: "75" },
+  { value: 100, emoji: "💎", label: "100" },
+  { value: 150, emoji: "🏆", label: "150" },
+];
+
 export default async function ClientsPage({
   searchParams,
 }: {
@@ -86,10 +94,45 @@ export default async function ClientsPage({
       {/* Stats par canal */}
       <div className="bg-white border-b border-gray-200 px-6 py-4 flex gap-3">
         {/* Carte Total */}
-        <div className="rounded-xl p-5 flex flex-col justify-between shrink-0 w-44" style={{ backgroundColor: "#1b2638" }}>
+        <div className="rounded-xl p-4 flex flex-col shrink-0 w-56" style={{ backgroundColor: "#1b2638" }}>
           <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Total clients</p>
-          <p className="text-5xl font-bold text-white mt-2 leading-none">{total}</p>
-          <p className="text-xs text-gray-500 mt-3">tous canaux confondus</p>
+          <p className="text-5xl font-bold text-white mt-1 leading-none">{total}</p>
+          <p className="text-xs text-gray-500 mt-1">tous canaux confondus</p>
+
+          {/* Barre de progression gamifiée */}
+          <div className="mt-4">
+            {/* Emojis milestones */}
+            <div className="flex justify-between mb-1">
+              {MILESTONES.map(({ value, emoji }) => {
+                const unlocked = total >= value;
+                return (
+                  <div key={value} className="flex flex-col items-center gap-0.5">
+                    <span className={`text-base leading-none transition-all duration-300 ${unlocked ? "drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" : "opacity-20 grayscale"}`}>
+                      {emoji}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Barre */}
+            <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
+              <div
+                className="h-2 rounded-full transition-all duration-700"
+                style={{
+                  width: `${Math.min((total / 150) * 100, 100)}%`,
+                  background: "linear-gradient(90deg, #f97316, #fbbf24)",
+                }}
+              />
+            </div>
+            {/* Labels */}
+            <div className="flex justify-between mt-1">
+              {MILESTONES.map(({ value }) => (
+                <span key={value} className={`text-[9px] font-medium transition-colors duration-300 ${total >= value ? "text-orange-400" : "text-gray-600"}`}>
+                  {value}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Cartes par canal */}
